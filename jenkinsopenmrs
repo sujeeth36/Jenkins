@@ -1,0 +1,24 @@
+---
+pipeline {
+    agent { label 'maven_jdk17' }
+    stages {
+        stage('VCS') {
+            steps {
+                git url: 'https://github.com/sujeeth36/openmrs-core.git' ,
+                    branch: 'master'
+            }
+        }
+        stage('package') {
+            steps {
+                sh 'export PATH="/usr/lib/jvm/java-1.17.0-openjdk-amd64/bin:$PATH" && mvn package'
+            }
+        }
+         stage('post build') {
+            steps {
+                archiveArtifacts artifacts: '**/target/openmrs-core.jar',
+                                 onlyIfSuccessful: true
+                junit testResults: '**/surefire-reports/TEST-*.xml'
+    }
+}
+    }
+}

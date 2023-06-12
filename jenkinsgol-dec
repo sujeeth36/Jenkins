@@ -1,0 +1,24 @@
+pipeline {
+    agent { label 'MAVEN_JDK8' }
+    stages {
+        stage('git') {
+            steps {
+                git url: 'https://github.com/sujeeth36/game-of-life.git' ,
+                    branch: 'master' 
+            }
+        }
+        stage('package') {
+            steps {
+                sh 'export PATH="/usr/lib/jvm/java-1.8.0-openjdk-amd64/bin:$PATH" && mvn package'
+        
+            }
+        }
+         stage('post build') {
+            steps {
+                archiveArtifacts artifacts: '**/target/gameoflife.war',
+                                 onlyIfSuccessful: true
+                junit testResults: '**/surefire-reports/TEST-*.xml'
+            }
+        }
+    }
+}

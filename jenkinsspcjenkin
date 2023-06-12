@@ -1,0 +1,31 @@
+pipeline {
+    agent { label 'RRR' }
+    stages {
+        stage('git') {
+            steps {
+                git url: 'https://github.com/sujeeth36/spring-petclinic.git' ,
+                    branch: 'main' 
+            }
+        }
+       
+        stage('package') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+         stage('post build') {
+            steps {
+                archiveArtifacts artifacts: '**/target/spring-petclinic.jar',
+                                 onlyIfSuccessful: true
+                junit testResults: '**/surefire-reports/TEST-*.xml'
+    }
+}
+        stage("build & SonarQube analysis") {
+            steps {
+              withSonarQubeEnv('RRR') {
+                sh 'mvn clean package sonar:sonar'
+              }
+            }
+          }      
+    }
+}
